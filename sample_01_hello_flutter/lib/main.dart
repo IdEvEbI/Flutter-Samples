@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
 
 class RandomWordsState extends State {
   final _suggestions = <WordPair>[];
+  final _listTitleStyle = const TextStyle(fontSize: 20);
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +43,18 @@ class RandomWordsState extends State {
           final idx = i ~/ 2; // ~/ 表示除以 2 的商
 
           // 缓冲 10 个单词对
-          if (idx > _suggestions.length) {
+          if (idx >= _suggestions.length) {
             _suggestions.addAll(generateWordPairs().take(10));
           }
 
           print('Item Builder $idx - ' + _suggestions[idx].asPascalCase);
-          return new ListTile(title: new Text(_suggestions[idx].asPascalCase));
+          return _buildRow(_suggestions[idx]);
         },
         padding: EdgeInsets.all(16.0));
   }
+
+  Widget _buildRow(WordPair pair) =>
+      new ListTile(title: new Text(pair.asPascalCase, style: _listTitleStyle));
 }
 
 class RandomWords extends StatefulWidget {
