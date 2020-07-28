@@ -36,12 +36,12 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-代码小结
+> 代码小结
 
-- Flutter 中大多数东西都是 widget；
-- widget 提供的 `build()` 方法用来根据内部较低级别的 widgets 显示自己；
-- `Scaffold` 提供了默认的**导航栏**、**标题**和包含**主屏幕 widget 树的 body 属性**，widget 树可以很复杂；
-- `body` 包含 `Center`，`Center` 包含 `Text`，`Center` 可以将其子 widget 树显示到屏幕中心。
+1. Flutter 中大多数东西都是 widget；
+2. widget 提供的 `build()` 方法用来根据内部较低级别的 widgets 显示自己；
+3. `Scaffold` 提供了默认的**导航栏**、**标题**和包含**主屏幕 widget 树的 body 属性**，widget 树可以很复杂；
+4. `body` 包含 `Center`，`Center` 包含 `Text`，`Center` 可以将其子 widget 树显示到屏幕中心。
 
 > 提示：在 VSCode 中按 `cmd + 单击` 可以直接查看源程序。
 
@@ -91,3 +91,46 @@ class MyApp extends StatelessWidget {
    ```
 
 > 提示：Center 的子对象已经不是常量，因此不能使用 `const` 修饰，否则会报错。
+
+## 四. Stateful Widget
+
+- `StatelessWidget` 是**不可变的**，这意味着它的属性不能改变；
+- `StatefulWidget` 持有的状态可能会在 widget 生命周期中发生变化。
+
+要实现一个**状态部件**，至少需要两个类：`StatefulWidget` 和 `State`。
+
+> 注意：`StatefulWidget` 类本身是不变的，但是 `State` 类在 widget 生命周期中始终存在。
+
+1. 在 `main.dart` 末尾新建 `RandomWordsState`，代码如下：
+
+   ```dart
+   class RandomWordsState extends State {
+     @override
+     Widget build(BuildContext context) {
+       return new Text(WordPair.random().asPascalCase);
+     }
+   }
+   ```
+
+2. 在 `main.dart` 末尾新建 `RandomWords`，代码如下：
+
+   ```dart
+   class RandomWords extends StatefulWidget {
+     @override
+     RandomWordsState createState() => new RandomWordsState();
+   }
+   ```
+
+3. 修改 `main.dart` 的 `MyApp` 中 `body` 如下：
+
+   ```dart
+   body: new Center(
+     child: new RandomWords(),
+   ),
+   ```
+
+> 代码套路
+
+1. 定义类继承自 `State`，重写 `build` 方法返回一个可变的 widget；
+2. 定义类继承自 `StatefulWidget`，重写 `createState` 方法返回状态部件；
+3. 在 `StatelessWidget` 部件中直接使用 `StatefulWidget`。
