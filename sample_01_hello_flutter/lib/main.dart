@@ -24,7 +24,17 @@ class MyApp extends StatelessWidget {
 class RandomWordsState extends State {
   @override
   Widget build(BuildContext context) {
-    return new Text(WordPair.random().asPascalCase);
+    return new Scaffold(
+      body: _buildSuggestions(),
+    );
+  }
+
+  Widget _buildSuggestions() {
+    return new ListView.builder(itemBuilder: (BuildContext _context, int i) {
+      print('Item Builder $i');
+
+      return new ListTile(title: new Text(i.toString()));
+    });
   }
 }
 
