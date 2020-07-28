@@ -238,3 +238,160 @@ class MyApp extends StatelessWidget {
    ```dart
    return _buildRow(_suggestions[idx]);
    ```
+
+## 六. 收藏单词对
+
+### 6.1 增加列表行尾部图标
+
+1. 修改 `_buildRow` 方法，在列表尾部添加图标，代码如下：
+
+   ```dart
+   Widget _buildRow(WordPair pair) {
+     return new ListTile(
+       title: new Text(pair.asPascalCase, style: _listTitleStyle),
+       trailing: new Icon(
+         Icons.favorite,
+         color: Colors.red,
+       ),
+     );
+   }
+   ```
+
+2. 在 `RandomWordsState` 使用集合记录用户收藏的单词，代码如下：
+
+   ```dart
+   final _saved = new Set<WordPair>();
+   ```
+
+   > 提示：Set 中不允许重复的值。
+
+3. 在 `_buildRow` 中增加局部变量，判断参数 `pair` 是否已经被用户收藏，代码如下：
+
+   ```dart
+   final bool alreaySaved = _saved.contains(pair);
+   ```
+
+4. 修改 `_buildRow` 的 `trailing` 代码如下：
+
+   ```dart
+   trailing: new Icon(
+     alreaySaved ? Icons.favorite : Icons.favorite_border,
+     color: alreaySaved ? Colors.red : null,
+   )
+   ```
+
+### 6.2 增加交互
+
+- 修改 `_buildRow`，在 `trailing` 下放增加 `onTap` 事件监听，代码如下：
+
+  ```dart
+  onTap: () {
+    setState(() {
+      alreaySaved ? _saved.remove(pair) : _saved.add(pair);
+    });
+  },
+  ```
+
+## 七. 页面跳转
+
+在 Flutter 中，页面间的跳转被称为路由 route，其中：
+
+- 导航器管理应用程序的**路由栈**；
+- 将路由推入（push）到路由栈中，会显示新路由的页面；
+- 从路由栈弹出（pop）路由，会返回到前一个路由。
+
+### 7.1 页面跳转实现
+
+1. 修改 `MyApp` 的 `build` 方法，删除 `AppBar` 代码如下：
+
+   ```dart
+   class MyApp extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) {
+       return new MaterialApp(home: new RandomWords());
+     }
+   }
+   ```
+
+2. 修改 `RandomWordsState` 的 `build` 方法，增加 `AppBar` 代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     return new Scaffold(
+       appBar: new AppBar(
+         title: new Text('单词列表'),
+         actions: <Widget>[
+           new IconButton(icon: const Icon(Icons.list), onPressed: _pushSaved),
+         ],
+       ),
+       body: _buildSuggestions(),
+     );
+   }
+   ```
+
+3. 在 `RandomWordsState` 添加一个私有方法 `_pushSaved` 并实现以下代码：
+
+   ```dart
+   void _pushSaved() {
+     Navigator.of(context)
+         .push(new MaterialPageRoute(builder: (BuildContext context) {
+       return new Scaffold(
+           appBar: new AppBar(
+         title: new Text('收藏单词'),
+       ));
+     }));
+   }
+   ```
+
+> 运行程序，点击导航栏右侧的列表按钮已经可以跳转到一个新的页面，并且能够实现页面间切换。
+
+### 7.2 显示子路由数据
+
+1. 修改 `_pushSaved` 方法，增加对 `_saved` 的数据处理，代码如下：
+
+   ```dart
+   final list = _saved.map((e) => new ListTile(
+       title: new Text(e.asPascalCase, style: _listTitleStyle)));
+   final children =
+       ListTile.divideTiles(tiles: list, context: context).toList();
+   ```
+
+2. 修改 `_pushSaved` 方法的 `return` 增加 `body` 内容显示，代码如下：
+
+   ```dart
+   return new Scaffold(
+     appBar: new AppBar(
+       title: new Text('收藏单词'),
+     ),
+     body: new ListView(children: children, padding: EdgeInsets.all(16)),
+   );
+   ```
+
+## 八. 使用 Themes
+
+- 修改 `MyApp` 的 `build` 方法，增加 `Themes` 代码如下：
+
+  ```dart
+  class MyApp extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      return new MaterialApp(
+          theme: new ThemeData(primaryColor: Colors.green),
+          home: new RandomWords());
+    }
+  }
+  ```
+
+## 九. 总结
+
+通过本案例习得以下知识点：
+
+1. Flutter 中大多数东西都是 widget；
+2. `StatelessWidget` 和 `StatefulWidget`，页面布局的基本套路；
+3. `ListView` 懒加载列表视图；
+4. 简单的交互实现；
+5. 通过状态更新视图；
+6. 通过 `Navigator` 路由栈实现导航跳转。
+
+> 心得：有 ES6+ 和 React 基础上手 Flutter 会很容易，学习新技术通过官网示例是最佳途径。
