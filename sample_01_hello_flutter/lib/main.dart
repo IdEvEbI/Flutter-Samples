@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
 
 class RandomWordsState extends State {
   final _suggestions = <WordPair>[];
+  final _saved = new Set<WordPair>();
   final _listTitleStyle = const TextStyle(fontSize: 20);
 
   @override
@@ -53,8 +54,17 @@ class RandomWordsState extends State {
         padding: EdgeInsets.all(16.0));
   }
 
-  Widget _buildRow(WordPair pair) =>
-      new ListTile(title: new Text(pair.asPascalCase, style: _listTitleStyle));
+  Widget _buildRow(WordPair pair) {
+    final bool alreaySaved = _saved.contains(pair);
+
+    return new ListTile(
+      title: new Text(pair.asPascalCase, style: _listTitleStyle),
+      trailing: new Icon(
+        alreaySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreaySaved ? Colors.red : null,
+      ),
+    );
+  }
 }
 
 class RandomWords extends StatefulWidget {
