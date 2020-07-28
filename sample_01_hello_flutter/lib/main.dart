@@ -30,11 +30,19 @@ class RandomWordsState extends State {
   }
 
   Widget _buildSuggestions() {
-    return new ListView.builder(itemBuilder: (BuildContext _context, int i) {
-      print('Item Builder $i');
+    return new ListView.builder(
+        itemBuilder: (BuildContext _context, int i) {
+          // 奇数行返回分割线
+          if (i.isOdd) {
+            return new Divider();
+          }
 
-      return new ListTile(title: new Text(i.toString()));
-    });
+          final idx = i ~/ 2; // ~/ 表示除以 2 的商
+          print('Item Builder $idx');
+
+          return new ListTile(title: new Text(idx.toString()));
+        },
+        padding: EdgeInsets.all(16.0));
   }
 }
 
