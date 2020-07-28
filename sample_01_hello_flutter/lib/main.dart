@@ -38,10 +38,17 @@ class RandomWordsState extends State {
   void _pushSaved() {
     Navigator.of(context)
         .push(new MaterialPageRoute(builder: (BuildContext context) {
+      final list = _saved.map((e) => new ListTile(
+          title: new Text(e.asPascalCase, style: _listTitleStyle)));
+      final children =
+          ListTile.divideTiles(tiles: list, context: context).toList();
+
       return new Scaffold(
-          appBar: new AppBar(
-        title: new Text('收藏单词'),
-      ));
+        appBar: new AppBar(
+          title: new Text('收藏单词'),
+        ),
+        body: new ListView(children: children, padding: EdgeInsets.all(16)),
+      );
     }));
   }
 
@@ -63,7 +70,7 @@ class RandomWordsState extends State {
           print('Item Builder $idx - ' + _suggestions[idx].asPascalCase);
           return _buildRow(_suggestions[idx]);
         },
-        padding: EdgeInsets.all(16.0));
+        padding: EdgeInsets.all(16));
   }
 
   Widget _buildRow(WordPair pair) {
