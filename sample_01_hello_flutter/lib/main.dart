@@ -22,6 +22,8 @@ class MyApp extends StatelessWidget {
 }
 
 class RandomWordsState extends State {
+  final _suggestions = <WordPair>[];
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -38,9 +40,14 @@ class RandomWordsState extends State {
           }
 
           final idx = i ~/ 2; // ~/ 表示除以 2 的商
-          print('Item Builder $idx');
 
-          return new ListTile(title: new Text(idx.toString()));
+          // 缓冲 10 个单词对
+          if (idx > _suggestions.length) {
+            _suggestions.addAll(generateWordPairs().take(10));
+          }
+
+          print('Item Builder $idx - ' + _suggestions[idx].asPascalCase);
+          return new ListTile(title: new Text(_suggestions[idx].asPascalCase));
         },
         padding: EdgeInsets.all(16.0));
   }
