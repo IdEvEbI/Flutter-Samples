@@ -44,3 +44,50 @@ class MyApp extends StatelessWidget {
 - `body` 包含 `Center`，`Center` 包含 `Text`，`Center` 可以将其子 widget 树显示到屏幕中心。
 
 > 提示：在 VSCode 中按 `cmd + 单击` 可以直接查看源程序。
+
+## 三. 使用包（package）
+
+1. 访问 [pub.dev 的 english_words](https://pub.flutter-io.cn/packages/english_words) 主页查看`english_words` 包的相关信息；
+
+2. 修改 `pubspec.yaml` 如下：
+
+   ```yaml
+   dependencies:
+     flutter:
+       sdk: flutter
+
+     cupertino_icons: ^0.1.3
+     english_words: ^3.1.5
+   ```
+
+3. 保存 `pubspec.yaml`，VSCode 会自动下载 `english_words` 包，并修改 `.packages` 文件；
+
+4. 修改 `main.dart` 文件如下：
+
+   ```dart
+   // 引入 english_word 包
+   import 'package:english_words/english_words.dart';
+
+   ...
+
+   class MyApp extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) {
+       final wordPair = new WordPair.random(); // 新增
+
+       return new MaterialApp(
+         title: 'Hello Flutter',
+         home: new Scaffold(
+           appBar: new AppBar(
+             title: const Text('第一个 Flutter App'),
+           ),
+           body: new Center( // const → new
+             child: new Text(wordPair.asPascalCase), // 替换
+           ),
+         ),
+       );
+     }
+   }
+   ```
+
+> 提示：Center 的子对象已经不是常量，因此不能使用 `const` 修饰，否则会报错。
