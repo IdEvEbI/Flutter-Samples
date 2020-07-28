@@ -8,11 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Hello Flutter',
       home: new Scaffold(
-        appBar: new AppBar(
-          title: const Text('第一个 Flutter App'),
-        ),
         body: new Center(
           child: new RandomWords(),
         ),
@@ -29,8 +25,24 @@ class RandomWordsState extends State {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('单词列表'),
+        actions: <Widget>[
+          new IconButton(icon: const Icon(Icons.list), onPressed: _pushSaved),
+        ],
+      ),
       body: _buildSuggestions(),
     );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context)
+        .push(new MaterialPageRoute(builder: (BuildContext context) {
+      return new Scaffold(
+          appBar: new AppBar(
+        title: new Text('收藏单词'),
+      ));
+    }));
   }
 
   Widget _buildSuggestions() {
