@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'style.dart';
+
 /// 仓库 App 类
 class CupertinoStoreApp extends StatelessWidget {
   @override
