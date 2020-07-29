@@ -16,15 +16,15 @@
 ```dart
 import 'package:flutter/material.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Hello Flutter',
-      home: new Scaffold(
-        appBar: new AppBar(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('第一个 Flutter App'),
         ),
         body: const Center(
@@ -73,16 +73,16 @@ class MyApp extends StatelessWidget {
    class MyApp extends StatelessWidget {
      @override
      Widget build(BuildContext context) {
-       final wordPair = new WordPair.random(); // 新增
+       final wordPair = WordPair.random(); // 新增
 
-       return new MaterialApp(
+       return MaterialApp(
          title: 'Hello Flutter',
-         home: new Scaffold(
-           appBar: new AppBar(
+         home: Scaffold(
+           appBar: AppBar(
              title: const Text('第一个 Flutter App'),
            ),
-           body: new Center( // const → new
-             child: new Text(wordPair.asPascalCase), // 替换
+           body: Center(
+             child: Text(wordPair.asPascalCase), // 替换
            ),
          ),
        );
@@ -107,7 +107,7 @@ class MyApp extends StatelessWidget {
    class RandomWordsState extends State {
      @override
      Widget build(BuildContext context) {
-       return new Text(WordPair.random().asPascalCase);
+       return Text(WordPair.random().asPascalCase);
      }
    }
    ```
@@ -117,15 +117,15 @@ class MyApp extends StatelessWidget {
    ```dart
    class RandomWords extends StatefulWidget {
      @override
-     RandomWordsState createState() => new RandomWordsState();
+     RandomWordsState createState() => RandomWordsState();
    }
    ```
 
 3. 修改 `main.dart` 的 `MyApp` 中 `body` 如下：
 
    ```dart
-   body: new Center(
-     child: new RandomWords(),
+   body: Center(
+     child: RandomWords(),
    ),
    ```
 
@@ -145,10 +145,10 @@ class MyApp extends StatelessWidget {
 
    ```dart
    Widget _buildSuggestions() {
-     return new ListView.builder(itemBuilder: (BuildContext _context, int i) {
+     return ListView.builder(itemBuilder: (BuildContext _context, int i) {
        print('Item Builder $i');
 
-       return new ListTile(title: new Text(i.toString()));
+       return ListTile(title: Text(i.toString()));
      });
    }
    ```
@@ -158,7 +158,7 @@ class MyApp extends StatelessWidget {
    ```dart
    @override
    Widget build(BuildContext context) {
-     return new Scaffold(
+     return Scaffold(
        body: _buildSuggestions(),
      );
    }
@@ -173,7 +173,7 @@ class MyApp extends StatelessWidget {
    ```dart
    // 奇数行返回分割线
    if (i.isOdd) {
-     return new Divider();
+     return Divider();
    }
    ```
 
@@ -183,7 +183,7 @@ class MyApp extends StatelessWidget {
    final idx = i ~/ 2; // ~/ 表示除以 2 的商
    print('Item Builder $idx');
 
-   return new ListTile(title: new Text(idx.toString()));
+   return ListTile(title: Text(idx.toString()));
    ```
 
 3. 增加列表内容的缩进，代码如下：
@@ -215,7 +215,7 @@ class MyApp extends StatelessWidget {
 
    ```dart
    print('Item Builder $idx - ' + _suggestions[idx].asPascalCase);
-   return new ListTile(title: new Text(_suggestions[idx].asPascalCase));
+   return ListTile(title: Text(_suggestions[idx].asPascalCase));
    ```
 
 ### 5.4 列表字体样式
@@ -230,7 +230,7 @@ class MyApp extends StatelessWidget {
 
    ```dart
    Widget _buildRow(WordPair pair) =>
-       new ListTile(title: new Text(pair.asPascalCase, style: _listTitleStyle));
+       ListTile(title: Text(pair.asPascalCase, style: _listTitleStyle));
    ```
 
 3. 修改 `_buildSuggestions` 的返回 widget 代码如下：
@@ -247,9 +247,9 @@ class MyApp extends StatelessWidget {
 
    ```dart
    Widget _buildRow(WordPair pair) {
-     return new ListTile(
-       title: new Text(pair.asPascalCase, style: _listTitleStyle),
-       trailing: new Icon(
+     return ListTile(
+       title: Text(pair.asPascalCase, style: _listTitleStyle),
+       trailing: Icon(
          Icons.favorite,
          color: Colors.red,
        ),
@@ -260,7 +260,7 @@ class MyApp extends StatelessWidget {
 2. 在 `RandomWordsState` 使用集合记录用户收藏的单词，代码如下：
 
    ```dart
-   final _saved = new Set<WordPair>();
+   final _saved = Set<WordPair>();
    ```
 
    > 提示：Set 中不允许重复的值。
@@ -274,7 +274,7 @@ class MyApp extends StatelessWidget {
 4. 修改 `_buildRow` 的 `trailing` 代码如下：
 
    ```dart
-   trailing: new Icon(
+   trailing: Icon(
      alreaySaved ? Icons.favorite : Icons.favorite_border,
      color: alreaySaved ? Colors.red : null,
    )
@@ -308,7 +308,7 @@ class MyApp extends StatelessWidget {
    class MyApp extends StatelessWidget {
      @override
      Widget build(BuildContext context) {
-       return new MaterialApp(home: new RandomWords());
+       return MaterialApp(home: RandomWords());
      }
    }
    ```
@@ -318,11 +318,11 @@ class MyApp extends StatelessWidget {
    ```dart
    @override
    Widget build(BuildContext context) {
-     return new Scaffold(
-       appBar: new AppBar(
-         title: new Text('单词列表'),
+     return Scaffold(
+       appBar: AppBar(
+         title: Text('单词列表'),
          actions: <Widget>[
-           new IconButton(icon: const Icon(Icons.list), onPressed: _pushSaved),
+           IconButton(icon: const Icon(Icons.list), onPressed: _pushSaved),
          ],
        ),
        body: _buildSuggestions(),
@@ -335,10 +335,10 @@ class MyApp extends StatelessWidget {
    ```dart
    void _pushSaved() {
      Navigator.of(context)
-         .push(new MaterialPageRoute(builder: (BuildContext context) {
-       return new Scaffold(
-           appBar: new AppBar(
-         title: new Text('收藏单词'),
+         .push(MaterialPageRoute(builder: (BuildContext context) {
+       return Scaffold(
+           appBar: AppBar(
+         title: Text('收藏单词'),
        ));
      }));
    }
@@ -351,8 +351,8 @@ class MyApp extends StatelessWidget {
 1. 修改 `_pushSaved` 方法，增加对 `_saved` 的数据处理，代码如下：
 
    ```dart
-   final list = _saved.map((e) => new ListTile(
-       title: new Text(e.asPascalCase, style: _listTitleStyle)));
+   final list = _saved.map((e) => ListTile(
+       title: Text(e.asPascalCase, style: _listTitleStyle)));
    final children =
        ListTile.divideTiles(tiles: list, context: context).toList();
    ```
@@ -360,11 +360,11 @@ class MyApp extends StatelessWidget {
 2. 修改 `_pushSaved` 方法的 `return` 增加 `body` 内容显示，代码如下：
 
    ```dart
-   return new Scaffold(
-     appBar: new AppBar(
-       title: new Text('收藏单词'),
+   return Scaffold(
+     appBar: AppBar(
+       title: Text('收藏单词'),
      ),
-     body: new ListView(children: children, padding: EdgeInsets.all(16)),
+     body: ListView(children: children, padding: EdgeInsets.all(16)),
    );
    ```
 
@@ -376,9 +376,9 @@ class MyApp extends StatelessWidget {
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
-      return new MaterialApp(
-          theme: new ThemeData(primaryColor: Colors.green),
-          home: new RandomWords());
+      return MaterialApp(
+          theme: ThemeData(primaryColor: Colors.green),
+          home: RandomWords());
     }
   }
   ```
@@ -395,3 +395,5 @@ class MyApp extends StatelessWidget {
 6. 通过 `Navigator` 路由栈实现导航跳转。
 
 > 心得：有 ES6+ 和 React 基础上手 Flutter 会很容易，学习新技术通过官网示例是最佳途径。
+
+**提示**：在 dart 2 中**实例化对象**是不需要使用 `new` 关键字的，详情请参阅：<https://stackoverflow.com/questions/50091389/do-you-need-to-use-the-new-keyword-in-dart/50091390>。
