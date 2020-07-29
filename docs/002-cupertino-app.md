@@ -28,7 +28,7 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
      @override
      Widget build(BuildContext context) {
        return CupertinoApp(
-         home: new Container(color: Colors.red),
+         home: Container(color: Colors.red),
        );
      }
    }
@@ -77,7 +77,7 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
 
    ```dart
    return CupertinoApp(
-     home: new CupertinoStoreHomePage(),
+     home: CupertinoStoreHomePage(),
    );
    ```
 
@@ -141,3 +141,5 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
    ```dart
    import 'style.dart';
    ```
+
+## 二. 添加 TabBar

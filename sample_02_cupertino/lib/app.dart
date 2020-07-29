@@ -8,7 +8,7 @@ class CupertinoStoreApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
-      home: new CupertinoStoreHomePage(),
+      home: CupertinoStoreHomePage(),
     );
   }
 }
