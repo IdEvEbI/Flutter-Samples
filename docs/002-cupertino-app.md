@@ -115,7 +115,7 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
        - packages/shrine_images/3-0.jpg
        - packages/shrine_images/4-0.jpg
 
-       ... 以下内容省略，详见 pubspec.yaml 内容
+       ... 以下内容省略，详见 pubspec.yaml
    ```
 
 ### 1.4 定义样式常量
@@ -133,7 +133,7 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
        fontWeight: FontWeight.normal,
      );
 
-   ... 以下内容省略，详见 style.dart 内容
+   ... 以下内容省略，详见 style.dart
    ```
 
 2. 在 `app.dart` 引入 `style.dart` 代码如下：
@@ -143,3 +143,179 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
    ```
 
 ## 二. 添加 TabBar
+
+1. 在 `CupertinoStoreHomePage` 中添加 `_pageScaffoldChild` 私有方法根据索引返回**临时**容器部件，代码如下：
+
+   ```dart
+   Widget _pageScaffoldChild(int index) {
+     switch (index) {
+       case 0:
+         return Container(
+           color: Colors.red,
+         );
+       case 1:
+         return Container(
+           color: Colors.blue,
+         );
+       case 2:
+         return Container(
+           color: Colors.green,
+         );
+       default:
+         throw ('$index is out of range.');
+     }
+   }
+   ```
+
+2. 修改 `CupertinoStoreHomePage` 的 `build` 方法，使用 `CupertinoTabScaffold` 替代 `CupertinoPageScaffold`，实现 App 底部的 TabBar，代码如下：
+
+   ```dart
+   Widget build(Object context) => CupertinoTabScaffold(
+         tabBar: CupertinoTabBar(
+           items: [
+             BottomNavigationBarItem(
+               icon: Icon(CupertinoIcons.home),
+               title: Text('商品'),
+             ),
+             BottomNavigationBarItem(
+               icon: Icon(CupertinoIcons.search),
+               title: Text('搜索'),
+             ),
+             BottomNavigationBarItem(
+               icon: Icon(CupertinoIcons.shopping_cart),
+               title: Text('购物车'),
+             ),
+           ],
+         ),
+         tabBuilder: (context, index) => CupertinoTabView(
+           builder: (context) => CupertinoPageScaffold(
+             child: _pageScaffoldChild(index),
+           ),
+         ),
+       );
+   ```
+
+## 三. 添加状态 (state) 管理
+
+### 3.1 商品类和商品库存类
+
+1. 新建 `lib/model/product.dart` 用于定义商品分类及商品属性，代码如下：
+
+   ```dart
+   import 'package:flutter/foundation.dart';
+
+   /// 商品分类
+   enum Category {
+     all,
+     accessories,
+     clothing,
+     home,
+   }
+
+   /// 商品
+   class Product {
+     const Product({
+       @required this.category,
+       @required this.id,
+       @required this.isFeatured,
+       @required this.name,
+       @required this.price,
+     })  : assert(category != null, 'category must not be null'),
+           assert(id != null, 'id must not be null'),
+           assert(isFeatured != null, 'isFeatured must not be null'),
+           assert(name != null, 'name must not be null'),
+           assert(price != null, 'price must not be null');
+
+     final Category category;
+     final int id;
+     final bool isFeatured;
+     final String name;
+     final int price;
+
+     String get assetName => '$id-0.jpg';
+     String get assetPackage => 'shhrine_images';
+
+     @override
+     String toString() => '$name (id=$id)';
+   }
+   ```
+
+2. 新建 `lib/model/products_repository.dart`，用于定义商品库存数据，代码如下：
+
+   ```dart
+   import 'product.dart';
+
+   class ProductsRepository {
+     static const _allProducts = <Product>[
+       Product(
+           category: Category.accessories,
+           id: 0,
+           isFeatured: true,
+           name: 'Vagabond sack',
+           price: 120),
+
+       ... 内容省略，详见 products_repository.dart
+     ];
+
+     static List<Product> loadProducts(Category category) =>
+         category == Category.all
+             ? _allProducts
+             : _allProducts.where((e) => e.category == category).toList();
+   }
+   ```
+
+   > 提示：当前示例把库存数据写死了，后续需要：① 网络获取 ② 序列化数据 ③ 字典转模型...
+
+### 3.2 商品模型类
+
+1. 新建 `lib/model/app_state_model.dart` 用于定义商品模型封装业务逻辑，代码如下：
+
+   ```dart
+   class AppStateModel extends foundation.ChangeNotifier {
+     // 所有可用商品
+     List<Product> _availableProducts;
+
+     /// 当前选中商品类别
+     Category _selectedCategory = Category.all;
+
+     /// 当前购物车信息：IDs 和数量
+     final _productsInCart = <int, int>{};
+
+     Category get selectedCategory => _selectedCategory;
+     Map<int, int> get productsInCart => Map.from(_productsInCart);
+
+     /// 购物车中的商品总数
+     int get totalCartQuantity => _productsInCart.values
+         .fold(0, (previousValue, element) => previousValue + element);
+
+     ... 内容省略，详见 app_state_model.dart
+   ```
+
+   > **体会**：要确定一门语言的基础语法掌握的是否能够支撑工作，写一遍完整的业务代码是个好办法；
+   > **提示**：`AppStateModel` 继承自 `foundation.ChangeNotifier`，代码中使用 `notifyListeners` 通知监听者。
+
+2. 修改 `lib/main.dart` 提供状态数据并添加监听，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:flutter/services.dart';
+   import 'package:provider/provider.dart';
+
+   import 'app.dart';
+   import 'model/app_state_model.dart';
+
+   void main() {
+     WidgetsFlutterBinding.ensureInitialized();
+
+     SystemChrome.setPreferredOrientations(
+         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
+     return runApp(ChangeNotifierProvider<AppStateModel>(
+       builder: (context) => AppStateModel()..loadProducts(),
+       child: CupertinoStoreApp(),
+     ));
+   }
+   ```
+
+   - `provider` 的 `ChangeNotifierProvider` 能够监听到 `AppStateModel` 因变化而发出的通知；
+   - 在 widget 的最上层实现 `AppStateModel` 可以保证状态在整个 App 中都可以被访问。
