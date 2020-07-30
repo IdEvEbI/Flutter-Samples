@@ -1,4 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'search_bar.dart';
+import '../style.dart';
 
 /// 搜索标签页
 class SearchTab extends StatefulWidget {
@@ -35,12 +39,23 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        CupertinoSliverNavigationBar(
-          largeTitle: Text('搜索'),
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Colors.blue,
+      ),
+      child: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: SearchBar(
+                controller: _controller,
+                focusNode: _focusNode,
+              ),
+            )
+          ],
         ),
-      ],
+      ),
     );
   }
 }
