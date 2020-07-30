@@ -565,3 +565,54 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
    ```
 
    > 运行程序，在调试控制台确认 `onPressed` 方法能够被正确执行。
+
+## 五. 产品搜索
+
+### 5.1 显示商品搜索 Tab 页
+
+1. 新建 `/lib/widgets/search_tab.dart` 用于显示商品搜索的 Tab 页，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+
+   class SearchTab extends StatefulWidget {
+     @override
+     State<StatefulWidget> createState() => _SearchTabState();
+   }
+
+   class _SearchTabState extends State<SearchTab> {
+     @override
+     Widget build(BuildContext context) {
+       return CustomScrollView(
+         slivers: <Widget>[
+           CupertinoSliverNavigationBar(
+             largeTitle: Text('搜索'),
+           ),
+         ],
+       );
+     }
+   }
+   ```
+
+2. 修改 `lib/app.dart` 引入 `search_tab.dart` 并修改第二个 Tab 页，代码如下：
+
+   ```dart
+   import 'widgets/search_tab.dart';
+
+   ... 以下内容省略，详见 app.dart
+
+     Widget _pageScaffoldChild(int index) {
+       switch (index) {
+         case 0:
+           return ProductListTab();
+         case 1:
+           return SearchTab();
+         case 2:
+           return Container(
+             color: Colors.green,
+           );
+         default:
+           throw ('$index is out of range.');
+       }
+     }
+   ```
