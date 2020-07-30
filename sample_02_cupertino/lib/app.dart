@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'style.dart';
+import 'widgets/product_list_tab.dart';
 
 /// 仓库 App 类
 class CupertinoStoreApp extends StatelessWidget {
@@ -43,9 +43,7 @@ class CupertinoStoreHomePage extends StatelessWidget {
   Widget _pageScaffoldChild(int index) {
     switch (index) {
       case 0:
-        return Container(
-          color: Colors.red,
-        );
+        return ProductListTab();
       case 1:
         return Container(
           color: Colors.blue,
