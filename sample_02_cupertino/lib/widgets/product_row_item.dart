@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../model/app_state_model.dart';
 import '../model/product.dart';
 import '../style.dart';
 
@@ -50,6 +52,21 @@ class ProductRowItem extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: const Icon(
+              CupertinoIcons.plus_circled,
+              semanticLabel: '加入购物车',
+            ),
+            onPressed: () {
+              print('将 ${product.name} 加入购物车');
+
+              final model = Provider.of<AppStateModel>(context);
+              model.addProductToCart(product.id);
+
+              print('购物车：${model.productsInCart}');
+            },
           ),
         ],
       ),
