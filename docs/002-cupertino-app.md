@@ -233,7 +233,7 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
      final int price;
 
      String get assetName => '$id-0.jpg';
-     String get assetPackage => 'shhrine_images';
+     String get assetPackage => 'shrine_images';
 
      @override
      String toString() => '$name (id=$id)';
@@ -319,3 +319,249 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
 
    - `provider` 的 `ChangeNotifierProvider` 能够监听到 `AppStateModel` 因变化而发出的通知；
    - 在 widget 的最上层实现 `AppStateModel` 可以保证状态在整个 App 中都可以被访问。
+
+## 四. 商品列表
+
+### 4.1 显示商品列表 Tab 页
+
+1. 新建 `lib/widgets/product_list_tab.dart` 用于显示整个商品的 Tab 页，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:provider/provider.dart';
+
+   import '../model/app_state_model.dart';
+
+   /// 商品列表 Tab 页
+   class ProductListTab extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) => CupertinoPageScaffold(
+           child: Consumer<AppStateModel>(
+             builder: (context, model, child) {
+               final products = model.getProducts();
+
+               return CustomScrollView(
+                 semanticChildCount: products.length,
+                 slivers: <Widget>[
+                   CupertinoSliverNavigationBar(
+                     largeTitle: Text('商品列表'),
+                   )
+                 ],
+               );
+             },
+           ),
+         );
+   }
+   ```
+
+2. 修改 `lib/app.dart` 引入 `product_list_tab.dart` 并修改第一个 Tab 页，代码如下：
+
+   ```dart
+   import 'widgets/product_list_tab.dart';
+
+   ... 以下内容省略，详见 app.dart
+
+     Widget _pageScaffoldChild(int index) {
+       switch (index) {
+         case 0:
+           return ProductListTab();
+         case 1:
+           return Container(
+             color: Colors.blue,
+           );
+         case 2:
+           return Container(
+             color: Colors.green,
+           );
+         default:
+           throw ('$index is out of range.');
+       }
+     }
+   ```
+
+   > 运行程序，确认**商品 Tab 页**能够显示一个带导航栏的空页面。
+
+### 4.2 显示商品明细行
+
+1. 新建 `lib/widgets/product_row_item.dart` 用于定义一行商品显示，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:flutter/material.dart';
+
+   import '../model/product.dart';
+
+   /// 商品行元素
+   class ProductRowItem extends StatelessWidget {
+     final Product product;
+     final int index;
+     final bool lastItem;
+
+     const ProductRowItem({this.product, this.index, this.lastItem});
+
+     @override
+     Widget build(BuildContext context) {
+       return Text(product.name);
+     }
+   }
+   ```
+
+   > 提示：以上代码仅定义了属性和构造函数，并且简单地显示了一下产品名称，有关界面细节稍后调整。
+
+2. 修改 `ProductListTab` 的 `build` 方法，增加**商品行元素**的显示，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:provider/provider.dart';
+
+   import '../model/app_state_model.dart';
+   import '../widgets/product_row_item.dart';
+
+   /// 商品列表 Tab 页面
+   class ProductListTab extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) => CupertinoPageScaffold(
+           child: Consumer<AppStateModel>(
+             builder: (context, model, child) {
+               final products = model.getProducts();
+
+               return CustomScrollView(
+                 semanticChildCount: products.length,
+                 slivers: <Widget>[
+                   CupertinoSliverNavigationBar(
+                     largeTitle: Text('商品列表'),
+                   ),
+                   SliverSafeArea(
+                     top: false,
+                     minimum: const EdgeInsets.only(top: 8),
+                     sliver: SliverList(
+                       delegate: SliverChildBuilderDelegate((context, index) {
+                         if (index < products.length) {
+                           return ProductRowItem(
+                             index: index,
+                             product: products[index],
+                             lastItem: index == products.length - 1,
+                           );
+                         } else {
+                           return null;
+                         }
+                       }),
+                     ),
+                   ),
+                 ],
+               );
+             },
+           ),
+         );
+   }
+   ```
+
+   > 运行程序，确认**商品 Tab 页**能够显示所有商品的名称，并且支持滚动。
+
+### 4.3 商品明细行布局
+
+1. 修改 `ProductRowItem` 的 `build` 方法，实现一个完整商品行的布局，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     final row = SafeArea(
+       top: false,
+       bottom: false,
+       minimum: const EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8),
+       child: Row(
+         children: <Widget>[
+           // 商品图片
+           ClipRRect(
+             borderRadius: BorderRadius.circular(4),
+             child: Image.asset(
+               product.assetName,
+               package: product.assetPackage,
+               fit: BoxFit.cover,
+               width: 76,
+               height: 76,
+             ),
+           ),
+           Expanded(
+             child: Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 12),
+               child: Column(
+                 mainAxisAlignment: MainAxisAlignment.start,
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: <Widget>[
+                   Text(
+                     product.name,
+                     style: Styles.productRowItemName,
+                   ),
+                   const Padding(padding: EdgeInsets.only(top: 8)),
+                   Text(
+                     '\$${product.price}',
+                     style: Styles.productRowItemPrice,
+                   )
+                 ],
+               ),
+             ),
+           ),
+         ],
+       ),
+     );
+
+     return row;
+   }
+   ```
+
+2. 修改 `ProductRowItem` 的 `build` 方法末尾的 `return row;`，在**每个商品之间增加一条分隔线**（末尾商品除外），代码如下：
+
+   ```dart
+   if (lastItem) {
+     return row;
+   }
+
+   return Column(
+     children: <Widget>[
+       row,
+       Padding(
+         padding: const EdgeInsets.only(
+           left: 100,
+           right: 16,
+         ),
+         child: Divider(
+           height: 1,
+           color: Styles.productRowDivider,
+         ),
+       ),
+     ],
+   );
+   ```
+
+### 4.4 添加到购物车
+
+1. 修改 `ProductRowItem` 的 `build` 方法，在 `row` 的 `Expanded` 后面增加一个 `CupertinoButton` 作为**添加到购物车按钮**，代码如下：
+
+   ```dart
+   CupertinoButton(
+     padding: EdgeInsets.zero,
+     child: const Icon(
+       CupertinoIcons.plus_circled,
+       semanticLabel: '加入购物车',
+     ),
+     onPressed: () {
+       print('将 ${product.name} 加入购物车');
+     },
+   ),
+   ```
+
+2. 实现 `onPressed` 方法，代码如下：
+
+   ```dart
+   onPressed: () {
+     print('将 ${product.name} 加入购物车');
+
+     final model = Provider.of<AppStateModel>(context);
+     model.addProductToCart(product.id);
+
+     print('购物车：${model.productsInCart}');
+   },
+   ```
+
+   > 运行程序，在调试控制台确认 `onPressed` 方法能够被正确执行。
