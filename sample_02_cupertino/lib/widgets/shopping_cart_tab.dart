@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../model/app_state_model.dart';
+import '../style.dart';
+
+const double _kDateTimePickerHeight = 218;
 
 class ShoppingCartTab extends StatefulWidget {
   @override
@@ -36,8 +40,14 @@ class _ShoppingCartTabState extends State<ShoppingCartTab> {
   SliverChildBuilderDelegate _buildSliverChildBuilderDelegate(
       AppStateModel model) {
     return SliverChildBuilderDelegate((context, index) {
-      if (index > 2) {
+      if (index > 3) {
         return null;
+      }
+      if (index == 3) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: _buildDateTimePicker(context),
+        );
       }
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -45,6 +55,49 @@ class _ShoppingCartTabState extends State<ShoppingCartTab> {
       );
     });
   }
+
+  Widget _buildDateTimePicker(BuildContext context) => Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    CupertinoIcons.clock,
+                    color: CupertinoColors.lightBackgroundGray,
+                    size: 28,
+                  ),
+                  SizedBox(
+                    width: 6,
+                  ),
+                  Text(
+                    '发货日期',
+                    style: Styles.deliveryTimeLabel,
+                  )
+                ],
+              ),
+              Text(
+                DateFormat.yMd().format(dateTime),
+                style: Styles.deliveryTimeLabel,
+              ),
+            ],
+          ),
+          Container(
+            height: _kDateTimePickerHeight,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              initialDateTime: dateTime,
+              onDateTimeChanged: (value) {
+                setState(() {
+                  dateTime = value;
+                });
+              },
+            ),
+          ),
+        ],
+      );
 
   CupertinoTextField _buildTextField(int index) {
     if (index > 2) {
