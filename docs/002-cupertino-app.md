@@ -616,3 +616,214 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
        }
      }
    ```
+
+### 5.2 定义私有成员记录搜索状态
+
+1. 定义 `_SearchTabState` 的私有成员用于保持搜索状态，代码如下：
+
+   ```dart
+   TextEditingController _controller;
+   FocusNode _focusNode;
+   String _terms = '';
+   ```
+
+2. 重写 `initState` 方法实例化私有成员，代码如下：
+
+   ```dart
+   @override
+   void initState() {
+     super.initState();
+
+     _controller = TextEditingController()
+       ..addListener(() {
+         setState(() {
+           _terms = _controller.text;
+         });
+       });
+     _focusNode = FocusNode();
+   }
+   ```
+
+3. 重写 `dispose` 方法释放资源，代码如下：
+
+   ```dart
+   @override
+   void dispose() {
+     _focusNode.dispose();
+     _controller.dispose();
+
+     super.dispose();
+   }
+   ```
+
+   > 提示：以上代码感受到了 iOS 开发的味道。
+
+### 5.3 显示搜索栏
+
+1. 新建 `/lib/widgets/search_bar.dart` 用于显示商品搜索栏，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   /// 搜索条
+   class SearchBar extends StatelessWidget {
+     final TextEditingController controller;
+     final FocusNode focusNode;
+
+     const SearchBar({
+       @required this.controller,
+       @required this.focusNode,
+     });
+
+     @override
+     Widget build(BuildContext context) => Container(
+           color: Colors.red,
+           height: 64,
+         );
+   }
+   ```
+
+2. 修改 `search_tab.dart` 增加文件引入，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   import 'search_bar.dart';
+   import '../style.dart';
+   ```
+
+3. 修改 `_SearchTabState` 的 `build` 方法显示搜索栏，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     return DecoratedBox(
+       decoration: const BoxDecoration(
+         color: Colors.blue,
+       ),
+       child: SafeArea(
+         child: Column(
+           children: <Widget>[
+             Padding(
+               padding: const EdgeInsets.all(8),
+               child: SearchBar(
+                 controller: _controller,
+                 focusNode: _focusNode,
+               ),
+             )
+           ],
+         ),
+       ),
+     );
+   }
+   ```
+
+   > 运行程序，可以看到蓝色背景下有一块用于显示搜索栏的红色区域。
+
+### 5.4 搜索栏布局
+
+1. 修改 `search_bar.dart` 的文件引入，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import '../style.dart';
+   ```
+
+2. 修改 `SearchBar` 的 `build` 方法实现搜索栏布局，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     return DecoratedBox(
+       decoration: BoxDecoration(
+         color: Styles.searchBackground,
+         borderRadius: BorderRadius.circular(10),
+       ),
+       child: Padding(
+         padding: const EdgeInsets.symmetric(
+           horizontal: 4,
+           vertical: 8,
+         ),
+         child: Row(
+           children: <Widget>[
+             const Icon(
+               CupertinoIcons.search,
+               color: Styles.searchIconColor,
+             ),
+             Expanded(
+               child: CupertinoTextField(
+                 controller: controller,
+                 focusNode: focusNode,
+                 style: Styles.searchText,
+                 cursorColor: Styles.searchCursorColor,
+               ),
+             ),
+             GestureDetector(
+               onTap: controller.clear,
+               child: const Icon(
+                 CupertinoIcons.clear_thick_circled,
+                 color: Styles.searchIconColor,
+               ),
+             ),
+           ],
+         ),
+       ),
+     );
+   }
+   ```
+
+### 5.5 搜索商品并显示结果
+
+1. 修改 `search_tab.dart` 的文件引入，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:provider/provider.dart';
+
+   import '../model/app_state_model.dart';
+   import 'product_row_item.dart';
+   import 'search_bar.dart';
+
+   import '../style.dart';
+   ```
+
+2. 修改 `_SearchTabState` 的 `build` 方法实现搜索结果布局，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     final model = Provider.of<AppStateModel>(context);
+     final results = model.search(_terms);
+
+     return DecoratedBox(
+       decoration: const BoxDecoration(
+         color: Styles.scaffoldBackground,
+       ),
+       child: SafeArea(
+         child: Column(
+           children: <Widget>[
+             Padding(
+               padding: const EdgeInsets.all(8),
+               child: SearchBar(
+                 controller: _controller,
+                 focusNode: _focusNode,
+               ),
+             ),
+             Expanded(
+               child: ListView.builder(
+                 itemBuilder: (context, index) => ProductRowItem(
+                   index: index,
+                   product: results[index],
+                   lastItem: index == results.length - 1,
+                 ),
+                 itemCount: results.length,
+               ),
+             ),
+           ],
+         ),
+       ),
+     );
+   }
+   ```
+
+   > 运行程序，搜索功能已经能够正常使用，这是因为在 [3.2 商品模型类] 已经实现过搜索的业务逻辑。
