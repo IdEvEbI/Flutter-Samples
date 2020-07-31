@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'widgets/product_list_tab.dart';
 import 'widgets/search_tab.dart';
+import 'widgets/shopping_cart_tab.dart';
 
 /// 仓库 App 类
 class CupertinoStoreApp extends StatelessWidget {
@@ -48,9 +49,7 @@ class CupertinoStoreHomePage extends StatelessWidget {
       case 1:
         return SearchTab();
       case 2:
-        return Container(
-          color: Colors.green,
-        );
+        return ShoppingCartTab();
       default:
         throw ('$index is out of range.');
     }
