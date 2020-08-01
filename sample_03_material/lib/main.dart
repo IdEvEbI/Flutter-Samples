@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+import 'app.dart';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Container(
-        color: Colors.blue,
-      );
-}
+void main() => runApp(MyApp());
