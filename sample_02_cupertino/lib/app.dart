@@ -11,6 +11,7 @@ class CupertinoStoreApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       home: CupertinoStoreHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
