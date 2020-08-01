@@ -827,3 +827,437 @@ Material 设计风格是为全平台设计的，可以保证 App 在任何平台
    ```
 
    > 运行程序，搜索功能已经能够正常使用，这是因为在 [3.2 商品模型类] 已经实现过搜索的业务逻辑。
+
+## 六. 客户信息和购物车
+
+### 6.1 显示购物车 Tab 页
+
+1. 新建 `/lib/widgets/shopping_cart_tab.dart` 用于显示购物车的 Tab 页，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:provider/provider.dart';
+
+   import '../model/app_state_model.dart';
+
+   class ShoppingCartTab extends StatefulWidget {
+     @override
+     State<StatefulWidget> createState() => _ShoppingCartTabState();
+   }
+
+   class _ShoppingCartTabState extends State<ShoppingCartTab> {
+     @override
+     Widget build(BuildContext context) => Consumer<AppStateModel>(
+           builder: (context, model, child) => CustomScrollView(
+             slivers: <Widget>[
+               CupertinoSliverNavigationBar(
+                 largeTitle: Text('购物车'),
+               ),
+             ],
+           ),
+         );
+   }
+   ```
+
+   - `provider` 中的 `Consumer` 可以用来协助 `state` 管理；
+   - 购物车 Tab 页 是一个 stateful widget，因为它要负责掌控需要购买的产品列表和客户信息。
+
+2. 修改 `lib/app.dart` 引入 `shopping_cart_tab.dart` 并修改第三个 Tab 页，代码如下：
+
+   ```dart
+   import 'widgets/search_tab.dart';
+
+   ... 以下内容省略，详见 app.dart
+
+     Widget _pageScaffoldChild(int index) {
+       switch (index) {
+         case 0:
+           return ProductListTab();
+         case 1:
+           return SearchTab();
+         case 2:
+           return ShoppingCartTab();
+         default:
+           throw ('$index is out of range.');
+       }
+     }
+   ```
+
+### 6.2 客户信息布局
+
+1. 在 `_ShoppingCartTabState` 中定义客户信息属性，代码如下：
+
+   ```dart
+   String name;
+   String email;
+   String location;
+   String pin;
+   DateTime dateTime = DateTime.now();
+   ```
+
+2. 在 `_ShoppingCartTabState` 中定义 `_buildTextField` 方法实现**姓名**、**邮件**和**地址**的界面布局，代码如下：
+
+   ```dart
+   CupertinoTextField _buildTextField(int index) {
+     if (index > 2) {
+       return null;
+     }
+
+     String placeholder = '请输入';
+     IconData icon;
+
+     if (index == 0) {
+       placeholder += '姓名';
+       icon = CupertinoIcons.person_solid;
+     } else if (index == 1) {
+       placeholder += '邮箱';
+       icon = CupertinoIcons.mail_solid;
+     } else {
+       placeholder += '地址';
+       icon = CupertinoIcons.location_solid;
+     }
+
+     return CupertinoTextField(
+       prefix: Icon(
+         icon,
+         color: CupertinoColors.lightBackgroundGray,
+         size: 28,
+       ),
+       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+       clearButtonMode: OverlayVisibilityMode.editing,
+       autocorrect: false,
+       decoration: const BoxDecoration(
+         border: Border(
+           bottom: BorderSide(width: 10, color: CupertinoColors.inactiveGray),
+         ),
+       ),
+       placeholder: placeholder,
+     );
+   }
+   ```
+
+3. 在 `_ShoppingCartTabState` 中定义 `_buildSliverChildBuilderDelegate` 实现输入文本框布局的代理，代码如下：
+
+   ```dart
+   SliverChildBuilderDelegate _buildSliverChildBuilderDelegate(
+       AppStateModel model) {
+     return SliverChildBuilderDelegate((context, index) {
+       if (index > 2) {
+         return null;
+       }
+       return Padding(
+         padding: const EdgeInsets.symmetric(horizontal: 16),
+         child: _buildTextField(index),
+       );
+     });
+   }
+   ```
+
+4. 修改 `build` 方法，通过 `delegate` 实现 `SliverList` 的布局，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) => Consumer<AppStateModel>(
+         builder: (context, model, child) => CustomScrollView(
+           slivers: <Widget>[
+             CupertinoSliverNavigationBar(
+               largeTitle: Text('购物车'),
+             ),
+             SliverSafeArea(
+               top: false,
+               minimum: const EdgeInsets.only(top: 4),
+               sliver: SliverList(
+                 delegate: _buildSliverChildBuilderDelegate(model),
+               ),
+             ),
+           ],
+         ),
+       );
+   ```
+
+### 6.3 增加日期选择
+
+1. 在 `/lib/widgets/shopping_cart_tab.dart` 顶部增加文件引入和常量定义，代码如下：
+
+   ```dart
+   import 'package:flutter/cupertino.dart';
+   import 'package:intl/intl.dart';
+   import 'package:provider/provider.dart';
+
+   import '../model/app_state_model.dart';
+   import '../style.dart';
+
+   const double _kDateTimePickerHeight = 218;
+   ```
+
+2. 新建 `_buildDateTimePicker` 实现日期选择器的界面布局，代码如下：
+
+   ```dart
+   Widget _buildDateTimePicker(BuildContext context) => Column(
+         children: <Widget>[
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: <Widget>[
+               Row(
+                 mainAxisAlignment: MainAxisAlignment.start,
+                 children: <Widget>[
+                   Icon(
+                     CupertinoIcons.clock,
+                     color: CupertinoColors.lightBackgroundGray,
+                     size: 28,
+                   ),
+                   SizedBox(
+                     width: 6,
+                   ),
+                   Text(
+                     '发货日期',
+                     style: Styles.deliveryTimeLabel,
+                   )
+                 ],
+               ),
+               Text(
+                 DateFormat.yMd().format(dateTime),
+                 style: Styles.deliveryTimeLabel,
+               ),
+             ],
+           ),
+           Container(
+             height: _kDateTimePickerHeight,
+             child: CupertinoDatePicker(
+               mode: CupertinoDatePickerMode.dateAndTime,
+               initialDateTime: dateTime,
+               onDateTimeChanged: (value) {
+                 setState(() {
+                   dateTime = value;
+                 });
+               },
+             ),
+           ),
+         ],
+       );
+   ```
+
+3. 修改 `_buildSliverChildBuilderDelegate` 方法在第 3 行显示日期选择器，代码如下：
+
+   ```dart
+   SliverChildBuilderDelegate _buildSliverChildBuilderDelegate(
+       AppStateModel model) {
+     return SliverChildBuilderDelegate((context, index) {
+       if (index > 3) {
+         return null;
+       }
+       if (index == 3) {
+         return Padding(
+           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+           child: _buildDateTimePicker(context),
+         );
+       }
+       return Padding(
+         padding: const EdgeInsets.symmetric(horizontal: 16),
+         child: _buildTextField(index),
+       );
+     });
+   }
+   ```
+
+   - `CupertinoDatePicker` 虽然具有 iOS 控件的风格，但是暂时还没找到支持中文的方法；
+   - `DateFormat` 还需要细化看一下 API 以确认如何按照中文习惯显示日期。
+
+### 6.4 显示购物车商品
+
+1. 新建 `shopping_cart_item.dart` 用于显示商品明细行，首先实现属性定义和构造函数，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+   import 'package:intl/intl.dart';
+
+   import '../model/product.dart';
+   import '../style.dart';
+
+   class ShoppingCartItem extends StatelessWidget {
+     final Product product;
+     final int index;
+     final bool lastItem;
+     final int quantity;
+     final NumberFormat formatter;
+
+     const ShoppingCartItem({
+       @required this.index,
+       @required this.product,
+       @required this.lastItem,
+       @required this.quantity,
+       @required this.formatter,
+     });
+
+     @override
+     Widget build(BuildContext context) => Container(
+           height: 64,
+           color: Colors.red,
+         );
+   }
+   ```
+
+2. 在 `shopping_cart_tab.dart` 顶部增加引用和常量定义，代码如下：
+
+   ```dart
+   import './shopping_cart_item.dart';
+
+   final _currencyFormat = NumberFormat.currency(symbol: '\￥');
+   ```
+
+3. 修改 `_buildSliverChildBuilderDelegate` 代码结构，以方便增加商品行显示，代码如下：
+
+   ```dart
+   SliverChildBuilderDelegate _buildSliverChildBuilderDelegate(
+       AppStateModel model) {
+     return SliverChildBuilderDelegate((context, index) {
+       // 1. 固定行 - 用户信息和发货日期
+       if (index < 3) {
+         return Padding(
+           padding: const EdgeInsets.symmetric(horizontal: 16),
+           child: _buildTextField(index),
+         );
+       } else if (index == 3) {
+         return Padding(
+           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+           child: _buildDateTimePicker(context),
+         );
+       }
+
+       // 2. 购物车商品行
+     });
+   }
+   ```
+
+4. 扩展 `_buildSliverChildBuilderDelegate` 方法，完成购物车商品行显示，代码如下：
+
+   ```dart
+   // 2. 购物车商品行
+   final productIndex = index - 4;
+
+   print('购物车种类： ${model.productsInCart.keys.length}');
+
+   if (model.productsInCart.length > productIndex) {
+     return ShoppingCartItem(
+       index: index,
+       product: model
+           .getProductById(model.productsInCart.keys.toList()[productIndex]),
+       quantity: model.productsInCart.values.toList()[productIndex],
+       lastItem: productIndex == model.productsInCart.length - 1,
+       formatter: _currencyFormat,
+     );
+   }
+
+   return null;
+   ```
+
+5. 修改 `ShoppingCartItem` 的 `build` 方法，完成商品行界面布局，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) => SafeArea(
+       top: false,
+       bottom: false,
+       child: Padding(
+         padding: const EdgeInsets.only(
+           left: 16,
+           top: 8,
+           bottom: 8,
+           right: 8,
+         ),
+         child: Row(
+           children: <Widget>[
+             ClipRRect(
+               borderRadius: BorderRadius.circular(4),
+               child: Image.asset(
+                 product.assetName,
+                 package: product.assetPackage,
+                 fit: BoxFit.cover,
+                 width: 40,
+                 height: 40,
+               ),
+             ),
+             Expanded(
+               child: Padding(
+                 padding: const EdgeInsets.symmetric(horizontal: 12),
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.start,
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: <Widget>[
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: <Widget>[
+                         Text(
+                           product.name,
+                           style: Styles.productRowItemName,
+                         ),
+                         Text(
+                           '${formatter.format(quantity * product.price)}',
+                           style: Styles.productRowItemName,
+                         ),
+                       ],
+                     ),
+                     const SizedBox(
+                       height: 4,
+                     ),
+                     Text(
+                       '${quantity > 1 ? '$quantity x ' : ''}'
+                       '${formatter.format(product.price)}',
+                       style: Styles.productRowItemPrice,
+                     )
+                   ],
+                 ),
+               ),
+             ),
+           ],
+         ),
+       ),
+     );
+   ```
+
+6. 扩展 `_buildSliverChildBuilderDelegate` 方法，完成订单总额显示，代码如下：
+
+   ```dart
+   else if (model.productsInCart.keys.length == productIndex &&
+       model.productsInCart.isNotEmpty) {
+     // 3. 显示订单总额
+     return Padding(
+       padding: const EdgeInsets.symmetric(horizontal: 20),
+       child: Row(
+         children: <Widget>[
+           Column(
+             crossAxisAlignment: CrossAxisAlignment.end,
+             children: <Widget>[
+               Text(
+                 'Shipping '
+                 '${_currencyFormat.format(model.shippingCost)}',
+                 style: Styles.productRowItemPrice,
+               ),
+               const SizedBox(height: 6),
+               Text(
+                 'Tax ${_currencyFormat.format(model.tax)}',
+                 style: Styles.productRowItemPrice,
+               ),
+               const SizedBox(height: 6),
+               Text(
+                 'Total  ${_currencyFormat.format(model.totalCost)}',
+                 style: Styles.productRowTotal,
+               ),
+             ],
+           ),
+         ],
+         mainAxisAlignment: MainAxisAlignment.end,
+       ),
+     );
+   }
+   ```
+
+## 七. 总结
+
+通过本案例演练，发现 Flutter 的开发与 iOS 有太多相似之处，诸如：
+
+1. TabBar + Navigator 的布局组合；
+2. ListView 是布局基础部件，使用 delegate 为 ListView 提供行部件；
+3. 在 `initState` 中初始化私有成员，在 `dispose` 中释放资源。
+
+另外，通过 `provider` 来实现跨界面的 state 管理真得是非常方便。
