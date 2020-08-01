@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../model/app_state_model.dart';
+import './shopping_cart_item.dart';
 import '../style.dart';
 
+final _currencyFormat = NumberFormat.currency(symbol: '\￥');
 const double _kDateTimePickerHeight = 218;
 
 class ShoppingCartTab extends StatefulWidget {
@@ -40,19 +42,67 @@ class _ShoppingCartTabState extends State<ShoppingCartTab> {
   SliverChildBuilderDelegate _buildSliverChildBuilderDelegate(
       AppStateModel model) {
     return SliverChildBuilderDelegate((context, index) {
-      if (index > 3) {
-        return null;
-      }
-      if (index == 3) {
+      // 1. 固定行 - 用户信息和发货日期
+      if (index < 3) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _buildTextField(index),
+        );
+      } else if (index == 3) {
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: _buildDateTimePicker(context),
         );
       }
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: _buildTextField(index),
-      );
+
+      // 2. 购物车商品行
+      final productIndex = index - 4;
+
+      print('购物车种类： ${model.productsInCart.keys.length}');
+
+      if (model.productsInCart.length > productIndex) {
+        return ShoppingCartItem(
+          index: index,
+          product: model
+              .getProductById(model.productsInCart.keys.toList()[productIndex]),
+          quantity: model.productsInCart.values.toList()[productIndex],
+          lastItem: productIndex == model.productsInCart.length - 1,
+          formatter: _currencyFormat,
+        );
+      } else if (model.productsInCart.keys.length == productIndex &&
+          model.productsInCart.isNotEmpty) {
+        // 3. 显示订单总额
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    'Shipping '
+                    '${_currencyFormat.format(model.shippingCost)}',
+                    style: Styles.productRowItemPrice,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Tax ${_currencyFormat.format(model.tax)}',
+                    style: Styles.productRowItemPrice,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Total  ${_currencyFormat.format(model.totalCost)}',
+                    style: Styles.productRowTotal,
+                  ),
+                ],
+              ),
+            ],
+            mainAxisAlignment: MainAxisAlignment.end,
+          ),
+        );
+      }
+
+      return null;
     });
   }
 
