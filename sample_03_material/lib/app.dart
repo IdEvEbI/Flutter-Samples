@@ -9,5 +9,19 @@ class MyApp extends StatelessWidget {
         title: 'Mateial',
         home: HomePage(),
         debugShowCheckedModeBanner: false,
+        initialRoute: '/login',
+        onGenerateRoute: _getRoute,
       );
+
+  Route _getRoute(RouteSettings settings) {
+    if (settings.name != '/login') {
+      return null;
+    }
+
+    return MaterialPageRoute(
+      settings: settings,
+      builder: (context) => LoginPage(),
+      fullscreenDialog: true,
+    );
+  }
 }
