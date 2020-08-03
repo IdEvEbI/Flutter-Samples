@@ -35,8 +35,36 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        body: Center(
-          child: Text('Hello material'),
+        body: GridView.count(
+          crossAxisCount: 2,
+          padding: EdgeInsets.all(16),
+          childAspectRatio: 8.0 / 9.0,
+          children: <Widget>[
+            Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  AspectRatio(
+                    aspectRatio: 18.0 / 11.0,
+                    child: Image.asset('assets/diamond.png'),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text('标题'),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text('详细信息')
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       );
 }
