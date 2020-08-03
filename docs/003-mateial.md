@@ -10,8 +10,21 @@
 
 1. 输入 `sample_03_material`，然后选择保存项目的目录；
 2. 添加 `assets` 目录包含了项目要使用的图像素材；
-3. 删除 `/test` 目录；
-4. 修改 `/lib/main.dart` 内容如下：
+3. 修改 `pubspec.yaml` 设置 `assets` 资源，代码如下：
+
+   ```yaml
+   flutter:
+     uses-material-design: true
+     assets:
+       - assets/diamond.png
+       - assets/0-0.jpg
+       - assets/1-0.jpg
+       - assets/2-0.jpg
+   ... 以下内容省略
+   ```
+
+4. 删除 `/test` 目录；
+5. 修改 `/lib/main.dart` 内容如下：
 
    ```dart
    import 'package:flutter/material.dart';
@@ -26,4 +39,205 @@
    }
    ```
 
-5. 运行可以看到一个空白的蓝色屏幕。
+   > 运行程序可以看到一个空白的蓝色屏幕。
+
+## 二. 页面路由
+
+### 1.1 路由文件准备
+
+1. 新建 `/lib/routes/home.dart` 作为 App 的首页，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   class HomePage extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) => Scaffold(
+           body: Center(
+             child: Text('Hello material'),
+           ),
+         );
+   }
+   ```
+
+2. 新建 `/lib/routes/login.dart` 作为登录页面，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   class LoginPage extends StatefulWidget {
+     @override
+     State<StatefulWidget> createState() => _LoginPageState();
+   }
+
+   class _LoginPageState extends State {
+     @override
+     Widget build(BuildContext context) => Scaffold(
+           body: Center(
+             child: Text('Login at here.'),
+           ),
+         );
+   }
+   ```
+
+3. 新建 `/lib/app.dart`，负责创建并管理 App，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   import 'routes/home.dart';
+   import 'routes/login.dart';
+
+   class MyApp extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) => MaterialApp(
+           title: 'Mateial',
+           home: HomePage(),
+           debugShowCheckedModeBanner: false,
+         );
+   }
+   ```
+
+4. 修改 `/lib/main.dart` 代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   import 'app.dart';
+
+   void main() => runApp(MyApp());
+   ```
+
+   > 运行程序确认 `HomePage` 能够正常显示。
+
+### 1.2 初始显示登录页面
+
+1. 在 `MyApp` 中增加 `_getRoute` 方法，根据 `setting` 返回路由，代码如下：
+
+   ```dart
+   Route _getRoute(RouteSettings settings) {
+     if (settings.name != '/login') {
+       return null;
+     }
+
+     return MaterialPageRoute(
+       settings: settings,
+       builder: (context) => LoginPage(),
+       fullscreenDialog: true,
+     );
+   }
+   ```
+
+2. 修改 `MyApp` 的 `build` 方法指定初始路由及生成路由使用的方法，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) => MaterialApp(
+         title: 'Mateial',
+         home: HomePage(),
+         debugShowCheckedModeBanner: false,
+         initialRoute: '/login',
+         onGenerateRoute: _getRoute,
+       );
+   ```
+
+   > 运行程序确认 `LoginPage` 能够正常显示。
+
+## 三. 登录页面布局
+
+### 3.1 页面图标和文本框
+
+1. 修改 `_LoginPageState` 的 `build` 方法，显示 App 图片和文字说明，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       body: SafeArea(
+         child: ListView(
+             padding: EdgeInsets.symmetric(horizontal: 24.0),
+             children: <Widget>[
+               SizedBox(height: 80.0),
+               Column(
+                 children: <Widget>[
+                   Image.asset('assets/diamond.png'),
+                   SizedBox(height: 16),
+                   Text('界面布局示例'),
+                 ],
+               ),
+             ]),
+       ),
+     );
+   }
+   ```
+
+2. 修改 `_LoginPageState` 定义两个私有成员用于记录用户输入的用户名和密码，代码如下：
+
+   ```dart
+   class _LoginPageState extends State {
+     final _usernameController = TextEditingController();
+     final _passwordController = TextEditingController();
+   ```
+
+3. 修改 `_LoginPageState` 的 `build` 方法，在 `Column` 下放追加两个 `TextField` 代码如下：
+
+   ```dart
+   SizedBox(height: 100),
+   TextField(
+     controller: _usernameController,
+     decoration: InputDecoration(filled: true, labelText: '用户名：'),
+   ),
+   SizedBox(
+     height: 12,
+   ),
+   TextField(
+     controller: _passwordController,
+     decoration: InputDecoration(filled: true, labelText: '密 码：'),
+     obscureText: true,
+   ),
+   ```
+
+   - `obscureText: true` 可以把用户输入自动替换为星号，一般用于输入密码。
+
+   > 运行程序确认登录页面能正常显示，并且确认一下文本框的悬浮标签和 ink 波纹效果。
+
+#### TextField 特性小结
+
+1. TextField 的外观很容易被改变，为 `decoration` 指定一个 `InputDecoration` 值即可；
+2. MDC 文本框默认会显示触摸反馈效果（称为 MDC 波纹或称 "ink" ）；
+3. `FormField` 与它相似，其特别的特性是可以在 Form 里嵌入字段；
+
+> 备注：在真机运行如果在两个文本框之前快速切换，输入窗口会有明显的闪动，**控制台会报自动布局约束警告**，影响用户体验。
+
+### 3.2 添加按钮并实现页面跳转
+
+- 修改 `_LoginPageState` 的 `build` 方法，在 `TextField` 下放追加一个 `ButtonBar` 代码如下：
+
+  ```dart
+  ButtonBar(
+    alignment: MainAxisAlignment.center,
+    children: <Widget>[
+      FlatButton(
+        child: Text('取消'),
+        onPressed: () {
+          _usernameController.clear();
+          _passwordController.clear();
+        },
+      ),
+      RaisedButton(
+        child: Text('登录'),
+        onPressed: () {
+          if (_usernameController.text.trim() == 'admin' &&
+              _passwordController.text == '123') {
+            Navigator.pop(context);
+          } else {
+            print('用户名或密码错误。');
+          }
+        },
+      ),
+    ],
+  ),
+  ```
+
+  - `_usernameController.clear()` 可以清空文本框中的内容；
+  - `Navigator.pop(context);` 可以销毁当前登录页面（从 Navigation 栈中出栈）。
