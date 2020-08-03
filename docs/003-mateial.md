@@ -241,3 +241,239 @@
 
   - `_usernameController.clear()` 可以清空文本框中的内容；
   - `Navigator.pop(context);` 可以销毁当前登录页面（从 Navigation 栈中出栈）。
+
+## 四. 首页
+
+### 4.1 添加顶部导航栏
+
+1. 修改 `HomePage` 的 `build` 方法，显示顶部导航栏，代码如下：
+
+   ```dart
+   class HomePage extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) => Scaffold(
+           appBar: AppBar(
+             title: Text('界面布局示例'),
+           ),
+           ...
+   ```
+
+2. 通过 `leading` 在导航栏左侧添加一个按钮，代码如下：
+
+   ```dart
+   leading: IconButton(
+     icon: Icon(
+       Icons.menu,
+       semanticLabel: '菜单',
+     ),
+     onPressed: () {
+       print('点击菜单按钮');
+     },
+   ),
+   ```
+
+3. 通过 `actions` 在导航栏右侧添加两个个按钮，代码如下：
+
+   ```dart
+   actions: <Widget>[
+     IconButton(
+       icon: Icon(
+         Icons.search,
+         semanticLabel: '搜索',
+       ),
+       onPressed: () {
+         print('点击搜索按钮');
+       },
+     ),
+     IconButton(
+       icon: Icon(
+         Icons.tune,
+         semanticLabel: '过滤',
+       ),
+       onPressed: () {
+         print('点击过滤按钮');
+       },
+     ),
+   ],
+   ```
+
+   - 有关 Material 风格的图标的详细信息，请参阅：<https://material.io/resources/icons/?style=baseline>。
+
+### 4.2 网格卡片 GridView
+
+1. 修改 `HomePage` 的 `build` 方法中的 `body`，将 `Center` 替换为 `GridVuiw`，代码如下：
+
+   ```dart
+   body: GridView.count(
+     crossAxisCount: 2,
+     padding: EdgeInsets.all(16),
+     childAspectRatio: 8.0 / 9.0,
+     children: <Widget>[
+       Card(),
+     ],
+   ),
+   ```
+
+   - GridView 中的条目是有限的，所以需要调用 `count()`；
+   - `crossAxisCount` 指定每横行展示多少条目；
+   - `childAspectRatio` 以宽高比（宽除以高）的形式定义了条目的大小，GridView 里每个条目的大小默认都是一样的。
+
+   > 提示：Cross axis 在 Flutter 中意思是**不可滚动的轴**，滚动的方向被称为**主轴**。
+
+2. 在 Card 中增加图片、标题和描述文字，代码如下：
+
+   ```dart
+   Card(
+     child: Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: <Widget>[
+         AspectRatio(
+           aspectRatio: 18.0 / 11.0,
+           child: Image.asset('assets/diamond.png'),
+         ),
+         Padding(
+           padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+           child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: <Widget>[
+               Text('标题'),
+               SizedBox(
+                 height: 8,
+               ),
+               Text('详细信息')
+             ],
+           ),
+         ),
+       ],
+     ),
+   ),
+   ```
+
+### 4.3 卡片集合
+
+1. 在 `HomePage` 新建 `_buildGridCards` 方法负责构建网络卡片集合，初始代码如下：
+
+   ```dart
+   /// 构建网格卡片集合
+   List<Card> _buildGridCards(int count) {
+     List<Card> cards = List.generate(
+         count,
+         (index) => Card(
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: <Widget>[
+                   AspectRatio(
+                     aspectRatio: 18.0 / 11.0,
+                     child: Image.asset('assets/diamond.png'),
+                   ),
+                   Padding(
+                     padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: <Widget>[
+                         Text('标题'),
+                         SizedBox(
+                           height: 8,
+                         ),
+                         Text('详细信息')
+                       ],
+                     ),
+                   )
+                 ],
+               ),
+             ));
+
+     return cards;
+   }
+   ```
+
+2. 修改 `build` 方法中的 `body`，使用 `_buildGridCards` 替换 `children` 内容，代码如下：
+
+   ```dart
+   body: GridView.count(
+     crossAxisCount: 2,
+     padding: EdgeInsets.all(16),
+     childAspectRatio: 8.0 / 9.0,
+     children: _buildGridCards(10),
+   ```
+
+### 4.4 产品数据
+
+1. 新建 `models` 目录用户保存数据模型；
+2. 复制 `sample_02_cupertino` 案例中使用的 `product.dart` 和 `products_repository.dart` 并稍作调整，直接从 `assets` 目录下加载图片资源，代码如下：
+
+   ```dart
+   String get assetName => 'assets/$id-0.jpg';
+   ```
+
+3. 在 `home.dart` 的顶部引入**产品模型**和**产品库存**数据，代码如下：
+
+   ```dart
+   import '../models/products_repository.dart';
+   import '../models/product.dart';
+   ```
+
+4. 修改 `_buildGridCards` 使用产品数据返回卡片集合，代码如下：
+
+   **注意：\_buildGridCards 的参数不在需要传入 count。**
+
+   ```dart
+   /// 构建网格卡片集合
+   List<Card> _buildGridCards() {
+     // 1. 加载所有商品
+     List<Product> products = ProductsRepository.loadProducts(Category.all);
+
+     if (products == null || products.isEmpty) {
+       return const <Card>[];
+     }
+
+     // 2. 生成商品列表
+     return products
+         .map((product) => Card(
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: <Widget>[
+                   AspectRatio(
+                     aspectRatio: 18.0 / 11.0,
+                     child: Image.asset(
+                       product.assetName,
+                       fit: BoxFit.fitWidth,
+                     ),
+                   ),
+                   Padding(
+                     padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: <Widget>[
+                         Text(
+                           product.name,
+                           maxLines: 1,
+                         ),
+                         SizedBox(
+                           height: 8,
+                         ),
+                         Text('￥ ' + product.price.toString())
+                       ],
+                     ),
+                   )
+                 ],
+               ),
+             ))
+         .toList();
+   }
+   ```
+
+   **提示**
+
+   - 在修改代码时，可以边修改边运行查看效果；
+   - `Image.asset` 的 `fit: BoxFit.fitWidth,` 可以按照图片宽度等比例裁切，让网格显示效果更整齐。
+
+5. 修改 `build` 方法中的 `body` 中 `_buildGridCards` 方法的调用，代码如下：
+
+   ```dart
+   body: GridView.count(
+     crossAxisCount: 2,
+     padding: EdgeInsets.all(16),
+     childAspectRatio: 8.0 / 9.0,
+     children: _buildGridCards(),
+   ```
