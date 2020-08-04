@@ -32,13 +32,27 @@ class MyApp extends StatelessWidget {
     final ThemeData base = ThemeData.light();
 
     return base.copyWith(
-      accentColor: kShrineBrown900,
-      primaryColor: kShrinePink100,
-      buttonColor: kShrinePink100,
-      scaffoldBackgroundColor: kShrineBackgroundWhite,
-      cardColor: kShrineBackgroundWhite,
-      textSelectionColor: kShrinePink100,
-      errorColor: kShrineErrorRed,
-    );
+        accentColor: kShrineBrown900,
+        primaryColor: kShrinePink100,
+        buttonColor: kShrinePink100,
+        scaffoldBackgroundColor: kShrineBackgroundWhite,
+        cardColor: kShrineBackgroundWhite,
+        textSelectionColor: kShrinePink100,
+        errorColor: kShrineErrorRed,
+        textTheme: _buildShrineTextTheme(base.textTheme),
+        primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
+        accentTextTheme: _buildShrineTextTheme(base.accentTextTheme));
   }
+
+  TextTheme _buildShrineTextTheme(TextTheme base) => base
+      .copyWith(
+          caption: base.caption.copyWith(
+        fontWeight: FontWeight.w400,
+        fontSize: 14.0,
+      ))
+      .apply(
+        fontFamily: 'Rubik',
+        displayColor: kShrineBrown900,
+        bodyColor: kShrineBrown900,
+      );
 }
