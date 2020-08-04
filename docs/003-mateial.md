@@ -477,3 +477,238 @@
      childAspectRatio: 8.0 / 9.0,
      children: _buildGridCards(),
    ```
+
+## 五. 配色和字体
+
+### 5.1 配色
+
+1. 新建 `/lib/common/colors.dart` 用于统一定义 App 配色，代码如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   const kShrinePink50 = const Color(0xFFFEEAE6);
+   const kShrinePink100 = const Color(0xFFFEDBD0);
+   const kShrinePink300 = const Color(0xFFFBB8AC);
+   const kShrinePink400 = const Color(0xFFEAA4A4);
+
+   const kShrineBrown900 = const Color(0xFF442B2D);
+
+   const kShrineErrorRed = const Color(0xFFC5032B);
+
+   const kShrineSurfaceWhite = const Color(0xFFFFFBFA);
+   const kShrineBackgroundWhite = Colors.white;
+   ```
+
+2. 在 `app.dart` 顶部引入 `colors.dart`，代码如下：
+
+   ```dart
+   import 'common/colors.dart';
+   ```
+
+3. 在 `MyApp` 类末尾定义 `_buildMyTheme` 私有方法，用于定义 App 配色，代码如下：
+
+   ```dart
+   ThemeData _buildMyTheme() {
+     final ThemeData base = ThemeData.light();
+
+     return base.copyWith(
+         accentColor: kShrineBrown900,
+         primaryColor: kShrinePink100,
+         buttonColor: kShrinePink100,
+         scaffoldBackgroundColor: kShrineBackgroundWhite,
+         cardColor: kShrineBackgroundWhite,
+         textSelectionColor: kShrinePink100,
+         errorColor: kShrineErrorRed,
+     );
+   }
+   ```
+
+4. 修改 `build` 方法，在末尾指定 `theme`，代码如下：
+
+   ```dart
+   @override
+   Widget build(BuildContext context) => MaterialApp(
+         title: 'Mateial',
+         home: HomePage(),
+         debugShowCheckedModeBanner: false,
+         initialRoute: '/login',
+         onGenerateRoute: _getRoute,
+         theme: _buildMyTheme(),
+       );
+   ```
+
+   > 运行程序，确认全局配色均已发生变化。
+
+### 5.2 自定义字体
+
+1. 复制 `Rubik-Regular.ttf` 和 `Rubik-Medium.ttf` 文件到 `assets/fonts` 目录下；
+2. 修改 `pubspec.yaml` 定义自定义字体素材，代码如下：
+
+   ```yaml
+   flutter:
+     fonts:
+       - family: Rubik
+         fonts:
+           - asset: assets/fonts/Rubik-Regular.ttf
+           - asset: assets/fonts/Rubik-Medium.ttf
+             weight: 500
+   ```
+
+   > 提示：务必注意 `yaml` 文件中的文本缩进。
+
+3. 在 `MyApp` 类末尾定义 `_buildShrineTextTheme` 私有方法，用于定义字体及配色，代码如下：
+
+   ```dart
+   TextTheme _buildShrineTextTheme(TextTheme base) => base
+       .copyWith(
+           caption: base.caption.copyWith(
+         fontWeight: FontWeight.w400,
+         fontSize: 14.0,
+       ))
+       .apply(
+         fontFamily: 'Rubik',
+         displayColor: kShrineBrown900,
+         bodyColor: kShrineBrown900,
+       );
+   ```
+
+4. 修改 `_buildMyTheme` 方法，在末尾定义文本方案，代码如下：
+
+   ```dart
+   textTheme: _buildShrineTextTheme(base.textTheme),
+   primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
+   accentTextTheme: _buildShrineTextTheme(base.accentTextTheme));
+   ```
+
+## 六. 阴影和几何图形
+
+### 6.1 阴影设置
+
+1. 修改 `HomePage` 的 `_buildGridCards` 方法，使用 `elevation` 取消卡片阴影，代码如下：
+
+   ```dart
+   return products
+       .map((product) => Card(
+             elevation: 0,
+             child: Column(
+   ```
+
+2. 修改 `LoginPage` 的 `build` 方法中的登录按钮，使用 `elevation` 调整按钮阴影大小，代码如下：
+
+   ```dart
+   RaisedButton(
+     child: Text('登录'),
+     elevation: 8,
+     onPressed: () {
+       if (_usernameController.text.trim() == 'admin' &&
+           _passwordController.text == '123') {
+         Navigator.pop(context);
+       } else {
+         print('用户名或密码错误。');
+       }
+     },
+   ),
+   ```
+
+### 6.2 输入框边框
+
+1. 将 `cut_corners_border.dart` 复制到 `supplemental` 目录；
+2. 在 `app.dart` 顶部增加文件引入，代码如下：
+
+   ```dart
+   import 'supplemental/cut_corners_border.dart';
+   ```
+
+3. 修改 `_buildMyTheme` 方法在末尾为 `inputDecoration` 指定边框，代码如下：
+
+   ```dart
+   inputDecorationTheme: InputDecorationTheme(
+     border: CutCornersBorder(),
+   ),
+   ```
+
+### 6.3 按钮边框
+
+- 修改 `_LoginPageState` 的 `build` 方法，分别指定取消按钮和登录按钮的边框，代码如下：
+
+  ```dart
+  ...
+
+  child: Text('取消'),
+  shape: BeveledRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(7)),
+  ),
+
+  ...
+
+  child: Text('登录'),
+  elevation: 8,
+  shape: BeveledRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(7)),
+  ),
+  ```
+
+  > 提示：虽然 `FlatButton` 默认没有边框，但是在用户触摸时会显示形状的波纹动画。
+
+### 6.4 更改列表视图布局
+
+1. 将 `asymmetric_view.dart`、`product_card.dart`、`product_columns.dart` 复制到 `supplemental` 目录；
+2. 修改 `home.dart` 如下：
+
+   ```dart
+   import 'package:flutter/material.dart';
+
+   import '../models/products_repository.dart';
+   import '../models/product.dart';
+   import '../supplemental/asymmetric_view.dart';
+
+   class HomePage extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) => Scaffold(
+         appBar: AppBar(
+           brightness: Brightness.light,
+           title: Text('界面布局示例'),
+           leading: IconButton(
+             icon: Icon(
+               Icons.menu,
+             ),
+             onPressed: () {
+               print('点击菜单按钮');
+             },
+           ),
+           actions: <Widget>[
+             IconButton(
+               icon: Icon(
+                 Icons.search,
+               ),
+               onPressed: () {
+                 print('点击搜索按钮');
+               },
+             ),
+             IconButton(
+               icon: Icon(
+                 Icons.tune,
+               ),
+               onPressed: () {
+                 print('点击过滤按钮');
+               },
+             ),
+           ],
+         ),
+         body: AsymmetricView(
+           products: ProductsRepository.loadProducts(Category.all),
+         ));
+   }
+   ```
+
+## 七. 总结
+
+通过本案例演练，对 Flutter 开发 App 在 UI 层面的基础套路已经基本建立，后续需要扩展的内容包括：
+
+1. 网络请求和异步
+2. 数据和业务模型
+3. 屏幕适配
+4. 动画
+
+除此之外，UI 层面的很多细节需要在实际开发中，通过实战演练不断强化和沉淀。
