@@ -42,6 +42,9 @@ class _LoginPageState extends State {
                 children: <Widget>[
                   FlatButton(
                     child: Text('取消'),
+                    shape: BeveledRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7)),
+                    ),
                     onPressed: () {
                       _usernameController.clear();
                       _passwordController.clear();
@@ -50,6 +53,9 @@ class _LoginPageState extends State {
                   RaisedButton(
                     child: Text('登录'),
                     elevation: 8,
+                    shape: BeveledRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(7)),
+                    ),
                     onPressed: () {
                       if (_usernameController.text.trim() == 'admin' &&
                           _passwordController.text == '123') {

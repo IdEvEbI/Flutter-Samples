@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'common/colors.dart';
+import 'supplemental/cut_corners_border.dart';
 
 import 'routes/home.dart';
 import 'routes/login.dart';
@@ -32,16 +33,20 @@ class MyApp extends StatelessWidget {
     final ThemeData base = ThemeData.light();
 
     return base.copyWith(
-        accentColor: kShrineBrown900,
-        primaryColor: kShrinePink100,
-        buttonColor: kShrinePink100,
-        scaffoldBackgroundColor: kShrineBackgroundWhite,
-        cardColor: kShrineBackgroundWhite,
-        textSelectionColor: kShrinePink100,
-        errorColor: kShrineErrorRed,
-        textTheme: _buildShrineTextTheme(base.textTheme),
-        primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
-        accentTextTheme: _buildShrineTextTheme(base.accentTextTheme));
+      accentColor: kShrineBrown900,
+      primaryColor: kShrinePink100,
+      buttonColor: kShrinePink100,
+      scaffoldBackgroundColor: kShrineBackgroundWhite,
+      cardColor: kShrineBackgroundWhite,
+      textSelectionColor: kShrinePink100,
+      errorColor: kShrineErrorRed,
+      textTheme: _buildShrineTextTheme(base.textTheme),
+      primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
+      accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
+      inputDecorationTheme: InputDecorationTheme(
+        border: CutCornersBorder(),
+      ),
+    );
   }
 
   TextTheme _buildShrineTextTheme(TextTheme base) => base
