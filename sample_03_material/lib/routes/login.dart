@@ -49,6 +49,7 @@ class _LoginPageState extends State {
                   ),
                   RaisedButton(
                     child: Text('登录'),
+                    elevation: 8,
                     onPressed: () {
                       if (_usernameController.text.trim() == 'admin' &&
                           _passwordController.text == '123') {

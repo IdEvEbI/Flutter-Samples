@@ -58,6 +58,7 @@ class HomePage extends StatelessWidget {
     // 2. 生成商品列表
     return products
         .map((product) => Card(
+              elevation: 0,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
